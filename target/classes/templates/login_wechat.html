@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>wechat</title>
+
+    <link rel="stylesheet" media="all" href="../static/qiniu/loginStyle.css" />
+</head>
+<body>
+<div class="sign">
+    <div class="logo"><a href="#"><img src="../static/qiniu/logo.svg" alt="Logo" /></a></div>
+    <div class="main">
+        <div class="js-sign-in-container">
+            <form name="user" action="/regist/regist" method="post" id="user" accept-charset="UTF-8">
+
+                <div class="input-prepend restyle js-normal">
+                    <input placeholder="用户名" type="text" id="name" name="name" pattern="^[a-zA-Z0-9_][a-zA-Z0-9_]{3,19}$" />
+                    <span style="color:red; position: absolute; top: 20px; right: 10px">*</span>
+                    <i class="iconfont ic-user"></i>
+                </div>
+
+                <div class="input-prepend">
+                    <input placeholder="密码" type="password" id="password" name="password" pattern="\w{6,18}" />
+                    <span style="color:red; position: absolute; top: 20px; right: 10px">*</span>
+                    <i class="iconfont ic-password"></i>
+                </div>
+
+                <button class="sign-up-button" id="sign-in-form-submit-btn" type="button" onclick="startSubmit()">
+                    登陆
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    var sessionid;
+    function startSubmit() {
+        if(user.name.value==""){
+            alert('用户名不能为空！');
+            user.name.focus();
+            return false;
+        }
+
+        if(user.password.value==""){
+            alert('密码不能为空！');
+            user.password.focus();
+            return false;
+        }
+
+        checkUserWhetherExist();
+    }
+
+    function checkUserWhetherExist() {
+        getUsers();
+        var url = 'http://192.168.8.157:8989/login';
+        var data = JSON.stringify({
+            "userName" : user.name.value,
+            "password" : user.password.value
+        });
+
+        alert(url)
+        postHttpRequest(url,data,parseSessionid);
+    }
+
+    function parseSessionid(sessionId) {
+        sessionid = sessionId;
+        alert('sessionid = ' + sessionid)
+    }
+
+    function postHttpRequest(url,data,func) {
+        alert('postHttpRequest receive request: url = ' + url)
+        var xmlhttp;
+        /*first step: instance XMLHttpRequest*/
+        if(window.XMLHttpRequest){
+            //  IE7+, Firefox, Chrome, Opera, Safari
+            xmlhttp = new XMLHttpRequest();
+        }else{
+            // IE6, IE5
+            xmlhttp =  new ActiveXObject("Microsoft.XMLHTTP");
+        }
+        xmlhttp.open("POST",url,true);
+        //xmlhttp.setRequestHeader('Content-Type','application/x-www-form-urlencoded');
+        xmlhttp.setRequestHeader('Content-Type','application/json');
+        xmlhttp.send(data);
+
+        xmlhttp.onreadystatechange=function(){
+            if(xmlhttp.readyState==4 & xmlhttp.status==200){
+                var text = xmlhttp.responseText; //用户已存在
+                alert("response:" + text)
+                func(text);
+            }else {
+                //alert('url=' + xmlhttp.url)
+                //alert('no response xmlhttp.readyState=' + xmlhttp.readyState + ' xmlhttp.status=' + xmlhttp.status);
+            }
+        }
+    }
+
+    function getUsers() {
+        var url = 'http://192.168.8.157:8989/user';
+        sendHttpRequest(url, showResult)
+    }
+
+    function showResult(result) {
+        alert(result)
+    }
+
+    function sendHttpRequest(url, func) {
+        //alert('sendHttpRequest receive request: url = ' + url)
+        var xmlhttp;
+        /*first step: instance XMLHttpRequest*/
+        if(window.XMLHttpRequest){
+            //  IE7+, Firefox, Chrome, Opera, Safari
+            xmlhttp = new XMLHttpRequest();
+        }else{
+            // IE6, IE5
+            xmlhttp =  new ActiveXObject("Microsoft.XMLHTTP");
+        }
+        /*second step: call open and set params，@true means async task,  false means sync task*/
+        xmlhttp.open("GET",url,true);
+        //xmlhttp.setRequestHeader('Content-Type','application/x-www-form-urlencoded');//for post
+        xmlhttp.send();
+        /*third step: listen to the response*/
+        xmlhttp.onreadystatechange=function(){
+            if(xmlhttp.readyState==4 & xmlhttp.status==200){
+                var text = xmlhttp.responseText;
+                //alert(text)
+                func(text);
+            }else {
+                //alert('url=' + xmlhttp.url)
+                //alert('no response xmlhttp.readyState=' + xmlhttp.readyState + ' xmlhttp.status=' + xmlhttp.status);
+            }
+        }
+    }
+</script>
+</body>
+</html>
